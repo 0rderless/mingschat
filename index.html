@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MingChat</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      background-color: #1f1f1f;
+      padding: 15px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      color: #00ffcc;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    }
+
+    #chat {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .message {
+      background-color: #2a2a2a;
+      padding: 10px 15px;
+      border-radius: 10px;
+      max-width: 80%;
+      word-wrap: break-word;
+      position: relative;
+    }
+
+    .username {
+      font-weight: bold;
+      color: #00ffcc;
+      margin-bottom: 5px;
+    }
+
+    .moderator-tag {
+      font-size: 12px;
+      color: #ffcc00;
+      margin-left: 8px;
+    }
+
+    .admin-tag {
+      font-size: 12px;
+      color: #ff4444;
+      margin-left: 8px;
+    }
+
+    .timestamp {
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 5px;
+    }
+
+    .delete-btn {
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      background: #ff4444;
+      border: none;
+      color: white;
+      padding: 2px 6px;
+      border-radius: 5px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    #input-area {
+      display: flex;
+      padding: 10px;
+      background-color: #1f1f1f;
+    }
+
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: none;
+    }
+
+    #messageInput {
+      flex: 1;
+      margin-right: 10px;
+    }
+
+    button {
+      background-color: #00ffcc;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #00ddb3;
+    }
+
+    #usernameModal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      z-index: 999;
+    }
+
+    #usernameModal input {
+      padding: 10px;
+      font-size: 18px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      border: none;
+    }
+
+    #usernameModal button {
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #00ffcc;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #clearBtn {
+      background-color: #ff4444;
+      border: none;
+      padding: 8px 12px;
+      margin: 10px;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div id="usernameModal">
+    <h2>Enter your username</h2>
+    <input type="text" id="usernameInput" placeholder="e.g. Bob">
+    <input type="password" id="modCodeInput" placeholder="Moderator/Admin code (optional)">
+    <button onclick="setUsername()">Join Chat</button>
+  </div>
+
+  <header>MingChat</header>
+  <div id="chat"></div>
+  <div id="input-area">
+    <input type="text" id="messageInput" placeholder="Type your message...">
+    <button onclick="sendMessage()">Send</button>
+    <button id="clearBtn" onclick="clearChat()" style="display:none;">Clear Chat</button>
+  </div>
+
+  <script>
+    let username = "";
+    let isModerator = false;
+    let isAdmin = false;
+
+    function setUsername() {
+      const nameInput = document.getElementById("usernameInput").value.trim();
+      const modCode = document.getElementById("modCodeInput").value.trim();
+      if (nameInput.length < 2) return alert("Username must be at least 2 characters.");
+      username = nameInput;
+
+      if (modCode === "9918") {
+        isModerator = true;
+      }
+      if (modCode === "9192") {
+        isAdmin = true;
+        isModerator = true;
+        document.getElementById("clearBtn").style.display = "inline-block";
+      }
+
+      document.getElementById("usernameModal").style.display = "none";
+      loadMessages();
+    }
+
+    function sendMessage() {
+      const text = document.getElementById("messageInput").value.trim();
+      if (text === "") return;
+      const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const message = { user: username, text, time: timestamp, mod: isModerator, admin: isAdmin };
+      addMessage(message);
+      saveMessage(message);
+      document.getElementById("messageInput").value = "";
+    }
+
+    function addMessage({ user, text, time, mod, admin }, index = null) {
+      const msg = document.createElement("div");
+      msg.className = "message";
+
+      let roleTag = "";
+      if (admin) roleTag = `<span class="admin-tag">[ADMIN]</span>`;
+      else if (mod) roleTag = `<span class="moderator-tag">[MOD]</span>`;
+
+      msg.innerHTML = `
+        <div class="username">${user}${roleTag}</div>
+        ${text}
+        <div class="timestamp">${time}</div>
+      `;
+
+      if (isModerator) {
+        const delBtn = document.createElement("button");
+        delBtn.className = "delete-btn";
+        delBtn.textContent = "Delete";
+        delBtn.onclick = () => deleteMessage(index);
+        msg.appendChild(delBtn);
+      }
+
+      document.getElementById("chat").appendChild(msg);
+      document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
+    }
+
+    function saveMessage(message) {
+      const messages = JSON.parse(localStorage.getItem("mingChat") || "[]");
+      messages.push(message);
+      localStorage.setItem("mingChat", JSON.stringify(messages));
+    }
+
+    function loadMessages() {
+      const messages = JSON.parse(localStorage.getItem("mingChat") || "[]");
+      messages.forEach((msg, i) => addMessage(msg, i));
+    }
+
+    function clearChat() {
+      if (!isAdmin) return alert("Only admins can clear all messages.");
+      if (confirm("Clear all messages?")) {
+        localStorage.removeItem("mingChat");
+        document.getElementById("chat").innerHTML = "";
+      }
+    }
+
+    function deleteMessage(index) {
+      const messages = JSON.parse(localStorage.getItem("mingChat") || "[]");
+      messages.splice(index, 1);
+      localStorage.setItem("mingChat", JSON.stringify(messages));
+      document.getElementById("chat").innerHTML = "";
+      loadMessages();
+    }
+  </script>
+</body>
+</html>
