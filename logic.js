@@ -4,7 +4,6 @@ let typingTimeout;
 
 function setUsername() {
   const nameInput = document.getElementById("usernameInput").value.trim();
-
   if (nameInput.length < 2) {
     alert("Username must be at least 2 characters.");
     return;
