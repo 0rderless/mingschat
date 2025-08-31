@@ -1,6 +1,5 @@
 let username = '';
 let isModerator = false;
-let isAdmin = false;
 let userRef = null;
 let typingTimeout;
 
@@ -15,14 +14,8 @@ function setUsername() {
 
   username = nameInput;
 
-  if (roleCode === "admin") {
-    isAdmin = true;
+  if (roleCode === "mod") {
     isModerator = true;
-  } else if (roleCode === "mod") {
-    isModerator = true;
-  }
-
-  if (isAdmin) {
     document.getElementById("clearBtn").style.display = "inline-block";
   }
 
@@ -33,24 +26,19 @@ function setUsername() {
 
   const userData = {
     name: username,
-    role: isAdmin ? "Admin" : isModerator ? "Mod" : "User"
+    role: isModerator ? "Mod" : "User"
   };
 
   userRef.set(userData);
   userRef.onDisconnect().remove();
 
   db.ref("presence").on("value", snapshot => {
-    const admins = [], mods = [], users = [];
+    const mods = [], users = [];
     snapshot.forEach(child => {
       const { name, role } = child.val();
-      if (role === "Admin") admins.push(name);
-      else if (role === "Mod") mods.push(name);
+      if (role === "Mod") mods.push(name);
       else users.push(name);
     });
-
-    document.getElementById("adminsList").innerHTML = admins.length
-      ? admins.map(n => `<span class="admin">${n}</span>`).join("<br>")
-      : "None";
 
     document.getElementById("modsList").innerHTML = mods.length
       ? mods.map(n => `<span class="mod">${n}</span>`).join("<br>")
@@ -59,6 +47,8 @@ function setUsername() {
     document.getElementById("usersList").innerHTML = users.length
       ? users.map(n => `<span class="user">${n}</span>`).join("<br>")
       : "None";
+
+    document.getElementById("adminsList").innerHTML = "None"; // Admins removed
   });
 
   db.ref("messages").on("child_added", snapshot => {
