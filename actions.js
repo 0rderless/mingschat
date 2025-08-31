@@ -11,7 +11,6 @@ function sendMessage() {
   };
 
   db.ref("messages").push(message);
-  db.ref("auditLog").push(`${username} sent a message`);
   input.value = "";
   db.ref("typingStatus").remove();
 }
@@ -26,7 +25,7 @@ function addMessage(msg, key) {
   nameSpan.className = "username";
   nameSpan.textContent = msg.username;
 
-  // Add role tag if sender is current user
+  // Show role tag for sender
   if (msg.username === username) {
     if (isAdmin) {
       const tag = document.createElement("span");
@@ -59,7 +58,6 @@ function addMessage(msg, key) {
     deleteBtn.textContent = "Delete";
     deleteBtn.onclick = () => {
       db.ref("messages/" + key).remove();
-      db.ref("auditLog").push(`${username} deleted a message`);
     };
     div.appendChild(deleteBtn);
 
@@ -81,7 +79,6 @@ function clearChat() {
     return;
   }
   db.ref("messages").remove();
-  db.ref("auditLog").push(`${username} cleared the chat`);
 }
 
 function updateTyping() {
