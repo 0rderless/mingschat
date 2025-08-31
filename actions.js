@@ -25,6 +25,7 @@ function addMessage(msg, key) {
   nameSpan.className = "username";
   nameSpan.textContent = msg.username;
 
+  // Show mod tag if sender is current user and is mod
   if (msg.username === username && isModerator) {
     const tag = document.createElement("span");
     tag.className = "moderator-tag";
@@ -43,5 +44,40 @@ function addMessage(msg, key) {
   timeDiv.textContent = msg.time;
   div.appendChild(timeDiv);
 
+  // Mod controls: delete and reply
   if (isModerator && msg.username !== username) {
-    const deleteBtn =
+    const deleteBtn = document.createElement("button");
+    deleteBtn.className = "delete-btn";
+    deleteBtn.textContent = "Delete";
+    deleteBtn.onclick = () => {
+      db.ref("messages/" + key).remove();
+    };
+    div.appendChild(deleteBtn);
+
+    const replyBtn = document.createElement("button");
+    replyBtn.className = "reply-btn";
+    replyBtn.textContent = "Reply";
+    replyBtn.onclick = () => {
+      document.getElementById("messageInput").value = `@${msg.username}: `;
+    };
+    div.appendChild(replyBtn);
+  }
+
+  document.getElementById("chat").appendChild(div);
+}
+
+function clearChat() {
+  if (!isModerator) {
+    alert("Only moderators can clear the chat.");
+    return;
+  }
+  db.ref("messages").remove();
+}
+
+function updateTyping() {
+  db.ref("typingStatus").set(username);
+  clearTimeout(typingTimeout);
+  typingTimeout = setTimeout(() => {
+    db.ref("typingStatus").remove();
+  }, 1000);
+}
