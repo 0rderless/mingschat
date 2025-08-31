@@ -35,7 +35,6 @@ function addMessage(msg, key) {
   timeDiv.textContent = msg.time;
   div.appendChild(timeDiv);
 
-  // Everyone can delete and reply
   if (msg.username !== username) {
     const deleteBtn = document.createElement("button");
     deleteBtn.className = "delete-btn";
