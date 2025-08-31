@@ -25,19 +25,12 @@ function addMessage(msg, key) {
   nameSpan.className = "username";
   nameSpan.textContent = msg.username;
 
-  // Show role tag for sender
-  if (msg.username === username) {
-    if (isAdmin) {
-      const tag = document.createElement("span");
-      tag.className = "admin-tag";
-      tag.textContent = "Admin";
-      nameSpan.appendChild(tag);
-    } else if (isModerator) {
-      const tag = document.createElement("span");
-      tag.className = "moderator-tag";
-      tag.textContent = "Mod";
-      nameSpan.appendChild(tag);
-    }
+  // Show mod tag if sender is current user and is mod
+  if (msg.username === username && isModerator) {
+    const tag = document.createElement("span");
+    tag.className = "moderator-tag";
+    tag.textContent = "Mod";
+    nameSpan.appendChild(tag);
   }
 
   div.appendChild(nameSpan);
@@ -51,8 +44,8 @@ function addMessage(msg, key) {
   timeDiv.textContent = msg.time;
   div.appendChild(timeDiv);
 
-  // Show delete/reply buttons if current user is mod/admin and not the sender
-  if ((isAdmin || isModerator) && msg.username !== username) {
+  // Mod controls: delete and reply
+  if (isModerator && msg.username !== username) {
     const deleteBtn = document.createElement("button");
     deleteBtn.className = "delete-btn";
     deleteBtn.textContent = "Delete";
@@ -74,8 +67,8 @@ function addMessage(msg, key) {
 }
 
 function clearChat() {
-  if (!isAdmin) {
-    alert("Only admins can clear the chat.");
+  if (!isModerator) {
+    alert("Only moderators can clear the chat.");
     return;
   }
   db.ref("messages").remove();
