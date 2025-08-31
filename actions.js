@@ -24,6 +24,14 @@ function addMessage(msg, key) {
   const nameSpan = document.createElement("span");
   nameSpan.className = "username";
   nameSpan.textContent = msg.username;
+
+  if (msg.username === username && isModerator) {
+    const tag = document.createElement("span");
+    tag.className = "moderator-tag";
+    tag.textContent = "Mod";
+    nameSpan.appendChild(tag);
+  }
+
   div.appendChild(nameSpan);
 
   const textDiv = document.createElement("div");
@@ -35,35 +43,5 @@ function addMessage(msg, key) {
   timeDiv.textContent = msg.time;
   div.appendChild(timeDiv);
 
-  if (msg.username !== username) {
-    const deleteBtn = document.createElement("button");
-    deleteBtn.className = "delete-btn";
-    deleteBtn.textContent = "Delete";
-    deleteBtn.onclick = () => {
-      db.ref("messages/" + key).remove();
-    };
-    div.appendChild(deleteBtn);
-
-    const replyBtn = document.createElement("button");
-    replyBtn.className = "reply-btn";
-    replyBtn.textContent = "Reply";
-    replyBtn.onclick = () => {
-      document.getElementById("messageInput").value = `@${msg.username}: `;
-    };
-    div.appendChild(replyBtn);
-  }
-
-  document.getElementById("chat").appendChild(div);
-}
-
-function clearChat() {
-  db.ref("messages").remove();
-}
-
-function updateTyping() {
-  db.ref("typingStatus").set(username);
-  clearTimeout(typingTimeout);
-  typingTimeout = setTimeout(() => {
-    db.ref("typingStatus").remove();
-  }, 1000);
-}
+  if (isModerator && msg.username !== username) {
+    const deleteBtn =
