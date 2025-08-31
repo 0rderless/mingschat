@@ -24,7 +24,6 @@ function setUsername() {
 
   if (isAdmin) {
     document.getElementById("clearBtn").style.display = "inline-block";
-    document.getElementById("auditLog").style.display = "block";
   }
 
   document.getElementById("usernameModal").style.display = "none";
@@ -73,13 +72,4 @@ function setUsername() {
       ? `${typingUser} is typing...`
       : "";
   });
-
-  db.ref("auditLog").on("child_added", snapshot => {
-    const log = snapshot.val();
-    const div = document.createElement("div");
-    div.textContent = log;
-    document.getElementById("auditLog").appendChild(div);
-  });
-
-  db.ref("auditLog").push(`${username} joined as ${userData.role}`);
 }
