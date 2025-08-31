@@ -7,8 +7,7 @@ function sendMessage() {
   const message = {
     username,
     text,
-    time: timestamp,
-    replyTo: null
+    time: timestamp
   };
 
   db.ref("messages").push(message);
@@ -18,6 +17,8 @@ function sendMessage() {
 }
 
 function addMessage(msg, key) {
+  if (!msg || !msg.username || !msg.text) return;
+
   const div = document.createElement("div");
   div.className = "message";
 
@@ -25,16 +26,19 @@ function addMessage(msg, key) {
   nameSpan.className = "username";
   nameSpan.textContent = msg.username;
 
-  if (isAdmin && msg.username === username) {
-    const tag = document.createElement("span");
-    tag.className = "admin-tag";
-    tag.textContent = "Admin";
-    nameSpan.appendChild(tag);
-  } else if (isModerator && msg.username === username) {
-    const tag = document.createElement("span");
-    tag.className = "moderator-tag";
-    tag.textContent = "Mod";
-    nameSpan.appendChild(tag);
+  // Add role tag if sender is current user
+  if (msg.username === username) {
+    if (isAdmin) {
+      const tag = document.createElement("span");
+      tag.className = "admin-tag";
+      tag.textContent = "Admin";
+      nameSpan.appendChild(tag);
+    } else if (isModerator) {
+      const tag = document.createElement("span");
+      tag.className = "moderator-tag";
+      tag.textContent = "Mod";
+      nameSpan.appendChild(tag);
+    }
   }
 
   div.appendChild(nameSpan);
@@ -48,6 +52,7 @@ function addMessage(msg, key) {
   timeDiv.textContent = msg.time;
   div.appendChild(timeDiv);
 
+  // Show delete/reply buttons if current user is mod/admin and not the sender
   if ((isAdmin || isModerator) && msg.username !== username) {
     const deleteBtn = document.createElement("button");
     deleteBtn.className = "delete-btn";
