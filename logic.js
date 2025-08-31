@@ -17,12 +17,10 @@ function setUsername() {
 
   if (roleCode === "mod") isModerator = true;
   if (roleCode === "admin") {
-    if (roleCode === "admin") {
-      isAdmin = true;
-      isModerator = true;
-      document.getElementById("clearBtn").style.display = "inline-block";
-      document.getElementById("auditLog").style.display = "block";
-    }
+    isAdmin = true;
+    isModerator = true;
+    document.getElementById("clearBtn").style.display = "inline-block";
+    document.getElementById("auditLog").style.display = "block";
   }
 
   document.getElementById("usernameModal").style.display = "none";
